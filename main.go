@@ -155,28 +155,23 @@ func (g Game) getUserInput() (int, error) {
 	if err := validateInput(inputNum, g.DifficultyMode.min, g.DifficultyMode.max); err != nil {
 		return 0, err
 	}
+	fmt.Printf(ColorYellow+"Вы ввели: %d\n"+ColorReset, inputNum)
 	return inputNum, nil
 }
 
 func (g *Game) playGame(secretNumber, attemptNumber int) {
-	var guess int
 	var attempts []int
 	var winner bool
-	for guess != secretNumber && len(attempts) < attemptNumber {
+	for !winner && len(attempts) < attemptNumber {
+		fmt.Printf(ColorYellow+"Попытка %d из %d\n"+ColorReset, len(attempts)+1, attemptNumber)
 		guess, err := g.getUserInput()
 		if err != nil {
 			fmt.Println(err)
 		} else {
 			attempts = append(attempts, guess)
-			if guess == secretNumber {
-				fmt.Printf(ColorGreen+"Вы угадали!🙌\n Число %d\n"+ColorReset, secretNumber)
-				winner = true
-				break
-			} else {
-				Hint(secretNumber, guess)
-			}
-			fmt.Printf("Осталось попыток: %d\n", attemptNumber-len(attempts))
+			winner = Hint(secretNumber, guess)
 		}
+		fmt.Printf("Осталось попыток: %d\n", attemptNumber-len(attempts))
 	}
 	if winner {
 		fmt.Println(ColorGreen + "Поздравляем! Вы выиграли!" + ColorReset)
@@ -191,20 +186,25 @@ func (g *Game) playGame(secretNumber, attemptNumber int) {
 	SaveGameStats(g.getGameStats(winner))
 }
 
-func Hint(secretNumber, guess int) {
-	difference := secretNumber - guess
-	absDifference := math.Abs(float64(difference))
-	if int(absDifference) <= 5 {
-		fmt.Print("Горячо! 🔥  ")
-	} else if int(absDifference) <= 15 {
-		fmt.Print("Тепло! 🌟  ")
+func Hint(secretNumber, guess int) bool {
+	if guess == secretNumber {
+		return true
 	} else {
-		fmt.Print("Холодно! ❄️  ")
-	}
-	if difference > 0 {
-		fmt.Println("Загаданное число больше вашего числа.")
-	} else if difference < 0 {
-		fmt.Println("Загаданное число меньше вашего числа.")
+		difference := secretNumber - guess
+		absDifference := math.Abs(float64(difference))
+		if int(absDifference) <= 5 {
+			fmt.Print("Горячо! 🔥  ")
+		} else if int(absDifference) <= 15 {
+			fmt.Print("Тепло! 🌟  ")
+		} else {
+			fmt.Print("Холодно! ❄️  ")
+		}
+		if difference > 0 {
+			fmt.Println("Загаданное число больше вашего числа.")
+		} else if difference < 0 {
+			fmt.Println("Загаданное число меньше вашего числа.")
+		}
+		return false
 	}
 }
 
