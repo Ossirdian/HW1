@@ -169,7 +169,7 @@ func (g *Game) playGame(secretNumber, attemptNumber int) {
 			fmt.Println(err)
 		} else {
 			attempts = append(attempts, guess)
-			winner = Hint(secretNumber, guess)
+			winner = processAttempts(secretNumber, guess)
 		}
 		fmt.Printf("Осталось попыток: %d\n", attemptNumber-len(attempts))
 	}
@@ -186,25 +186,28 @@ func (g *Game) playGame(secretNumber, attemptNumber int) {
 	SaveGameStats(g.getGameStats(winner))
 }
 
-func Hint(secretNumber, guess int) bool {
-	if guess == secretNumber {
+func processAttempts(secretNumber, guess int) bool {
+	switch {
+	case guess == secretNumber:
 		return true
+	case guess < secretNumber:
+		fmt.Println("Загаданное число больше вашего числа.")
+	case guess > secretNumber:
+		fmt.Println("Загаданное число меньше вашего числа.")
+	}
+	hint(guess, secretNumber)
+	return false
+}
+
+func hint(secretNumber, guess int) {
+	difference := secretNumber - guess
+	absDifference := math.Abs(float64(difference))
+	if int(absDifference) <= 5 {
+		fmt.Print("Горячо! 🔥  ")
+	} else if int(absDifference) <= 15 {
+		fmt.Print("Тепло! 🌟  ")
 	} else {
-		difference := secretNumber - guess
-		absDifference := math.Abs(float64(difference))
-		if int(absDifference) <= 5 {
-			fmt.Print("Горячо! 🔥  ")
-		} else if int(absDifference) <= 15 {
-			fmt.Print("Тепло! 🌟  ")
-		} else {
-			fmt.Print("Холодно! ❄️  ")
-		}
-		if difference > 0 {
-			fmt.Println("Загаданное число больше вашего числа.")
-		} else if difference < 0 {
-			fmt.Println("Загаданное число меньше вашего числа.")
-		}
-		return false
+		fmt.Print("Холодно! ❄️  ")
 	}
 }
 
